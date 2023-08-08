@@ -21,17 +21,43 @@ final class CollectionViewDataSource: NSObject, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellViewModel.reuseIdentifier, for: indexPath) as? CollectionViewCell else { return UICollectionViewCell() }
-        if let model = viewModel.itemAtIndexPath(indexPath) {
-            
-            let cellViewModel = CellViewModel(networkManager: viewModel.networkManager)
-            cellViewModel.model = model
-            cell.viewModel = cellViewModel
-            cell.setUpdateImageObserver()
-        } else {
-            NSLog("photo model == nil")
+        
+        let photoRecord = viewModel.itemAtIndexPath(indexPath)
+        
+        let cellViewModel = CellViewModel(photoRecord: photoRecord)
+        cell.viewModel = cellViewModel
+        
+        switch photoRecord.state {
+        case .failed: print("failed")
+        case .new, .downloaded: startDownload(cellViewModel: cellViewModel, at: indexPath)
         }
         
         return cell
+    }
+    
+    
+    private func startDownload(cellViewModel: CellViewModel, at indexPath: IndexPath) {
+        
+        guard viewModel.pendingOperations.downloadsInProgress[indexPath] == nil else {
+            return
+        }
+        
+        let downloader = ImageDownloader(cellViewModel.photoRecord)
+        
+        downloader.completionBlock = {
+            if downloader.isCancelled {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.viewModel.pendingOperations.downloadsInProgress.removeValue(forKey: indexPath)
+                cellViewModel.updateCell?()
+                
+            }
+        }
+        
+        viewModel.pendingOperations.downloadsInProgress[indexPath] = downloader
+        viewModel.pendingOperations.downloadQueue.addOperation(downloader)
     }
     
 }

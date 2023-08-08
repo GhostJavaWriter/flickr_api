@@ -21,7 +21,7 @@ enum NetworkError: Error {
 
 final class NetworkManager {
     
-    func getPhotos(searchText: String?,
+    func getImagesWith(searchText: String?,
                    completion: @escaping (Result<ResponseModel, NetworkError>) -> Void) {
         
         guard let request = getRequest(searchText) else {

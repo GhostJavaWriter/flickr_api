@@ -9,7 +9,11 @@ import UIKit
 
 final class CollectionViewCell: UICollectionViewCell {
     
-    var viewModel: CellViewModel?
+    var viewModel: CellViewModel? {
+        didSet {
+            updateImage()
+        }
+    }
     
     private lazy var photoImageView: UIImageView = {
         let imageView = UIImageView()
@@ -30,19 +34,18 @@ final class CollectionViewCell: UICollectionViewCell {
         super.init(frame: frame)
         
         setupUI()
+        
+        
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setUpdateImageObserver() {
-        viewModel?.updateImage = { [weak self] image in
-            
-            DispatchQueue.main.async {
-                self?.photoImageView.image = image
-                self?.activityIndicator.stopAnimating()
-            }
+    private func updateImage() {
+        viewModel?.updateCell = { [weak self] in
+            self?.photoImageView.image = self?.viewModel?.photoRecord.image
+            self?.activityIndicator.stopAnimating()
         }
     }
     

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class MainScreenViewController: UIViewController, UICollectionViewDelegate {
+class MainScreenViewController: UIViewController {
 
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -34,7 +34,8 @@ class MainScreenViewController: UIViewController, UICollectionViewDelegate {
         let controller = UISearchController(searchResultsController: nil)
         controller.searchBar.sizeToFit()
         controller.searchBar.placeholder = "Search photo..."
-        controller.searchResultsUpdater = self
+        controller.searchResultsUpdater = viewModel
+        controller.searchBar.delegate = viewModel
         return controller
     }()
     
@@ -112,12 +113,20 @@ class MainScreenViewController: UIViewController, UICollectionViewDelegate {
             collectionView.bottomAnchor.constraint(equalTo: layouGuide.bottomAnchor)
         ])
     }
+    
 }
 
-extension MainScreenViewController: UISearchResultsUpdating {
+extension MainScreenViewController: UICollectionViewDelegate {
     
-    func updateSearchResults(for searchController: UISearchController) {
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         
     }
     
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        
+    }
 }
