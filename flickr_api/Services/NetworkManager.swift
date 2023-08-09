@@ -47,8 +47,8 @@ final class NetworkManager {
         pendingOperations.downloadQueue.addOperation(downloader)
     }
     
-    func getImagesWith(searchText: String?,
-                   completion: @escaping (Result<ResponseModel, NetworkError>) -> Void) {
+    func getImagesWith<T: Codable>(of type: T.Type, searchText: String?,
+                       completion: @escaping (Result<T, NetworkError>) -> Void) {
         
         guard let request = getRequest(searchText) else {
             completion(.failure(.invalidURL))
@@ -72,7 +72,7 @@ final class NetworkManager {
             }
             
             do {
-                let result = try self.decodeFromJSON(data: data, type: ResponseModel.self)
+                let result = try self.decodeFromJSON(data: data, type: T.self)
                 completion(.success(result))
             } catch {
                 completion(.failure(.decodingError(error)))
