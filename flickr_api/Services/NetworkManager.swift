@@ -47,7 +47,7 @@ final class NetworkManager {
         pendingOperations.downloadQueue.addOperation(downloader)
     }
     
-    func getImagesWith<T: Codable>(of type: T.Type, searchText: String?,
+    func getImagesWith<T: Codable>(searchText: String?,
                        completion: @escaping (Result<T, NetworkError>) -> Void) {
         
         guard let request = getRequest(searchText) else {

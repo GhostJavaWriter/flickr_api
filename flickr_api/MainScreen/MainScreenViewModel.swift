@@ -34,7 +34,9 @@ final class MainScreenViewModel: NSObject {
     }
     
     private func getImagesWith(searchText: String?) {
-        networkManager.getImagesWith(of: ResponseModel.self, searchText: searchText) { [weak self] result in
+        
+        networkManager.getImagesWith(searchText: searchText)
+        { [weak self] (result: Result<ResponseModel, NetworkError>) in
             
             guard let self = self else { return }
             switch result {
