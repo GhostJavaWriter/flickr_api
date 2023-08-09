@@ -11,13 +11,11 @@ final class MainScreenViewModel: NSObject {
     
     var networkManager: NetworkManager
     
-    private var images: [PhotoRecord] = [] {
+    private var resources: [ItemViewModel] = [] {
         didSet {
             updateUI?()
         }
     }
-    
-    let pendingOperations = PendingOperations()
     
     var updateUI: (() -> Void)?
     
@@ -28,22 +26,28 @@ final class MainScreenViewModel: NSObject {
     }
     
     func numberOfItemsInSection() -> Int {
-        images.count
+        resources.count
     }
     
-    func itemAtIndexPath(_ indexPath: IndexPath) -> PhotoRecord {
-        images[indexPath.row]
+    func itemAtIndexPath(_ indexPath: IndexPath) -> ItemViewModel {
+        resources[indexPath.row]
     }
     
     private func getImagesWith(searchText: String?) {
-        networkManager.getImagesWith(searchText: searchText) { result in
+        networkManager.getImagesWith(searchText: searchText) { [weak self] result in
+            
+            guard let self = self else { return }
             switch result {
             case .success(let model):
-                var images: [PhotoRecord] = []
-                for imageModel in model.photos.photo {
-                    images.append(PhotoRecord(imageModel: imageModel))
+                var resources: [ItemViewModel] = []
+                let photoModels = model.photos.photo
+                for photoModel in photoModels {
+                    let photoRecord = PhotoRecord(imageModel: photoModel)
+                    let itemViewModel = ResourceViewModel(networkManager: self.networkManager, photoRecord: photoRecord)
+                    resources.append(itemViewModel)
                 }
-                self.images = images
+                self.resources = resources
+                
             case .failure(let error): print(error.localizedDescription)
                 // TODO: - handle error
             }

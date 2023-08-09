@@ -21,6 +21,32 @@ enum NetworkError: Error {
 
 final class NetworkManager {
     
+    private let pendingOperations = PendingOperations()
+    
+    func addLoadOperation(photoRecord: PhotoRecord,
+                          at indexPath: IndexPath,
+                          completion: @escaping (() -> Void)) {
+        guard pendingOperations.downloadsInProgress[indexPath] == nil else {
+            return
+        }
+        
+        let downloader = ImageDownloader(photoRecord)
+        
+        downloader.completionBlock = {
+            if downloader.isCancelled {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.pendingOperations.downloadsInProgress.removeValue(forKey: indexPath)
+                completion()
+            }
+        }
+        
+        pendingOperations.downloadsInProgress[indexPath] = downloader
+        pendingOperations.downloadQueue.addOperation(downloader)
+    }
+    
     func getImagesWith(searchText: String?,
                    completion: @escaping (Result<ResponseModel, NetworkError>) -> Void) {
         
@@ -54,29 +80,6 @@ final class NetworkManager {
         }.resume()
     }
     
-    func loadImage(from url: URL,
-                   completion: @escaping (Result<UIImage?, NetworkError>) -> Void) {
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                completion(.failure(.transportError(error)))
-                return
-            }
-            
-            if let response = response as? HTTPURLResponse, !(200...299).contains(response.statusCode) {
-                completion(.failure(.serverError(statusCode: response.statusCode)))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(.noData))
-                return
-            }
-            
-            completion(.success(UIImage(data: data)))
-            
-        }.resume()
-    }
-    
     private func decodeFromJSON<T: Codable>(data: Data, type: T.Type) throws -> T {
         do {
             let decodedData = try JSONDecoder().decode(T.self, from: data)
@@ -97,7 +100,8 @@ final class NetworkManager {
             URLQueryItem(name: "api_key", value: Constants.SearchRequest.apiKey),
             URLQueryItem(name: "format", value: Constants.SearchRequest.format),
             URLQueryItem(name: "text", value: searchText ?? Constants.SearchRequest.defaultText),
-            URLQueryItem(name: "nojsoncallback", value: "1")
+            URLQueryItem(name: "nojsoncallback", value: "1"),
+            URLQueryItem(name: "per_page", value: "20")
         ]
         
         guard let url = components.url else { return nil }

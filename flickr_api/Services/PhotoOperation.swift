@@ -46,6 +46,7 @@ final class ImageDownloader: Operation {
         if isCancelled {
             return
         }
+        
         let model = photoRecord.imageModel
         let imageURLString = "https://farm\(model.farm).static.flickr.com/\(model.server)/\(model.id)_\(model.secret).jpg"
         
@@ -53,22 +54,28 @@ final class ImageDownloader: Operation {
             // TODO: - handle error
             return
         }
-        sleep(2)
-        guard let imageData = try? Data(contentsOf: url) else {
-            // TODO: - handle error
-            return
-        }
         
-        if isCancelled {
-            return
-        }
-        
-        if !imageData.isEmpty {
+        do {
+            let imageData = try Data(contentsOf: url)
+            
+            if isCancelled {
+                return
+            }
+            
+            guard !imageData.isEmpty else {
+                photoRecord.state = .failed
+                photoRecord.image = UIImage(named: "errorImagePlaceholder")
+                NSLog(NetworkError.noData.localizedDescription)
+                return
+            }
+            
             photoRecord.image = UIImage(data:imageData)
             photoRecord.state = .downloaded
-        } else {
+            
+        } catch {
             photoRecord.state = .failed
-            photoRecord.image = UIImage(named: "placeHolderImage")
+            photoRecord.image = UIImage(named: "errorImagePlaceholder")
+            NSLog(error.localizedDescription)
         }
     }
 }

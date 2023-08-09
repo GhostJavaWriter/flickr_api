@@ -13,7 +13,7 @@ enum Constants {
         static let apiKey = "6af377dc54798281790fc638f6e4da5e"
         static let method = "flickr.photos.search"
         static let format = "json"
-        static let defaultText = "kittens"
+        static let defaultText = "ghost"
     }
 }
 

@@ -16,48 +16,18 @@ final class CollectionViewDataSource: NSObject, UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.numberOfItemsInSection()
+        viewModel.numberOfItemsInSection()
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CellViewModel.reuseIdentifier, for: indexPath) as? CollectionViewCell else { return UICollectionViewCell() }
         
-        let photoRecord = viewModel.itemAtIndexPath(indexPath)
+        let model = viewModel.itemAtIndexPath(indexPath)
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: model.reuseIdentifier,
+                                                      for: indexPath)
         
-        let cellViewModel = CellViewModel(photoRecord: photoRecord)
-        cell.viewModel = cellViewModel
-        
-        switch photoRecord.state {
-        case .failed: print("failed")
-        case .new, .downloaded: startDownload(cellViewModel: cellViewModel, at: indexPath)
-        }
+        model.setup(cell, in: collectionView, at: indexPath)
         
         return cell
-    }
-    
-    
-    private func startDownload(cellViewModel: CellViewModel, at indexPath: IndexPath) {
-        
-        guard viewModel.pendingOperations.downloadsInProgress[indexPath] == nil else {
-            return
-        }
-        
-        let downloader = ImageDownloader(cellViewModel.photoRecord)
-        
-        downloader.completionBlock = {
-            if downloader.isCancelled {
-                return
-            }
-            
-            DispatchQueue.main.async {
-                self.viewModel.pendingOperations.downloadsInProgress.removeValue(forKey: indexPath)
-                cellViewModel.updateCell?()
-                
-            }
-        }
-        
-        viewModel.pendingOperations.downloadsInProgress[indexPath] = downloader
-        viewModel.pendingOperations.downloadQueue.addOperation(downloader)
     }
     
 }

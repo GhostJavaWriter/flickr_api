@@ -19,7 +19,8 @@ class MainScreenViewController: UIViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.delegate = self
         collectionView.dataSource = dataSource
-        collectionView.register(CollectionViewCell.self, forCellWithReuseIdentifier: CellViewModel.reuseIdentifier)
+        collectionView.register(CollectionViewCell.self,
+                                forCellWithReuseIdentifier: String(describing: CollectionViewCell.self))
         return collectionView
     }()
     
