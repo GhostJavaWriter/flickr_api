@@ -7,7 +7,16 @@
 
 import UIKit
 
+protocol ResourceCell {
+    
+    func setupResource(image: UIImage)
+    func startAnimating()
+    func stopAnimating()
+}
+
 final class CollectionViewCell: UICollectionViewCell, ResourceCell {
+    
+    static let reuseIdentifier = String(describing: CollectionViewCell.self)
     
     private lazy var photoImageView: UIImageView = {
         let imageView = UIImageView()
@@ -15,6 +24,7 @@ final class CollectionViewCell: UICollectionViewCell, ResourceCell {
         imageView.backgroundColor = .systemGray
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
+        imageView.image = UIImage(named: "placeHolderImage")
         return imageView
     }()
     
@@ -35,8 +45,22 @@ final class CollectionViewCell: UICollectionViewCell, ResourceCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        photoImageView.image = UIImage(named: "placeHolderImage")
+    }
+    
     func setupResource(image: UIImage) {
         photoImageView.image = image
+    }
+    
+    func startAnimating() {
+        activityIndicator.startAnimating()
+    }
+    
+    func stopAnimating() {
+        activityIndicator.stopAnimating()
     }
     
     private func setupUI() {

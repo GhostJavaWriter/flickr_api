@@ -16,14 +16,9 @@ protocol ItemViewModel {
                at indexPath: IndexPath)
 }
 
-protocol ResourceCell {
-    
-    func setupResource(image: UIImage)
-}
-
 struct ResourceViewModel: ItemViewModel {
     
-    var reuseIdentifier = String(describing: CollectionViewCell.self)
+    var reuseIdentifier = CollectionViewCell.reuseIdentifier
     
     let networkManager: NetworkManager
     let photoRecord: PhotoRecord
@@ -32,18 +27,38 @@ struct ResourceViewModel: ItemViewModel {
                in collectionView: UICollectionView,
                at indexPath: IndexPath) {
         
-        networkManager.addLoadOperation(photoRecord: photoRecord, at: indexPath) {
-            guard let cell = collectionView.cellForItem(at: indexPath) as? ResourceCell else {
-                NSLog("cell error")
-                return
+        guard let cell = cell as? ResourceCell else {
+            NSLog("cell error(1)")
+            return
+        }
+        guard let image = photoRecord.image else {
+            NSLog("image == nil")
+            return
+        }
+        
+        cell.setupResource(image: image)
+        
+        switch photoRecord.state {
+        case .downloaded:
+            cell.stopAnimating()
+            NSLog("downloaded")
+        case .failed:
+            cell.stopAnimating()
+            NSLog("failed")
+        case .new:
+            cell.startAnimating()
+            networkManager.addLoadOperation(photoRecord: photoRecord, at: indexPath) {
+                
+                guard let cell = collectionView.cellForItem(at: indexPath) as? ResourceCell else {
+                    NSLog("cell error(2)")
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    collectionView.reloadItems(at: [indexPath])
+                    cell.stopAnimating()
+                }
             }
-            
-            guard let image = photoRecord.image else {
-                NSLog("image == nil")
-                return
-            }
-            
-            cell.setupResource(image: image)
         }
     }
 }

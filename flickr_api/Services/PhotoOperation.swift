@@ -56,6 +56,7 @@ final class ImageDownloader: Operation {
         }
         
         do {
+            
             let imageData = try Data(contentsOf: url)
             
             if isCancelled {

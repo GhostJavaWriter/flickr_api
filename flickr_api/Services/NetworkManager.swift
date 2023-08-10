@@ -26,6 +26,7 @@ final class NetworkManager {
     func addLoadOperation(photoRecord: PhotoRecord,
                           at indexPath: IndexPath,
                           completion: @escaping (() -> Void)) {
+        
         guard pendingOperations.downloadsInProgress[indexPath] == nil else {
             return
         }
