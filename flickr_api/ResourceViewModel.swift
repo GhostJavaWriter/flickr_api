@@ -9,16 +9,12 @@ import UIKit
 
 protocol ItemViewModel {
     
-    var reuseIdentifier: String { get }
-    
     func setup(_ cell: UICollectionReusableView,
                in collectionView: UICollectionView,
                at indexPath: IndexPath)
 }
 
 struct ResourceViewModel: ItemViewModel {
-    
-    var reuseIdentifier = CollectionViewCell.reuseIdentifier
     
     let networkManager: NetworkManager
     let photoRecord: PhotoRecord

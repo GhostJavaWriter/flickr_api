@@ -20,7 +20,7 @@ class MainScreenViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = dataSource
         collectionView.register(CollectionViewCell.self,
-                                forCellWithReuseIdentifier: String(describing: CollectionViewCell.self))
+                                forCellWithReuseIdentifier: CollectionViewCell.defaultReuseIdentifier)
         return collectionView
     }()
     

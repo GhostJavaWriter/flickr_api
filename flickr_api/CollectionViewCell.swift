@@ -16,8 +16,6 @@ protocol ResourceCell {
 
 final class CollectionViewCell: UICollectionViewCell, ResourceCell {
     
-    static let reuseIdentifier = String(describing: CollectionViewCell.self)
-    
     private lazy var photoImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -77,4 +75,8 @@ final class CollectionViewCell: UICollectionViewCell, ResourceCell {
             activityIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
         ])
     }
+}
+
+extension UICollectionViewCell {
+    static var defaultReuseIdentifier: String { String(describing: self) }
 }
