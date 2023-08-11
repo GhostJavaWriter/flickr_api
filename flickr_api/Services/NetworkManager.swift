@@ -49,9 +49,10 @@ final class NetworkManager {
     }
     
     func getImagesWith<T: Codable>(searchText: String?,
-                       completion: @escaping (Result<T, NetworkError>) -> Void) {
+                                   page: String?,
+                                   completion: @escaping (Result<T, NetworkError>) -> Void) {
         
-        guard let request = getRequest(searchText) else {
+        guard let request = getRequest(searchText, page: page) else {
             completion(.failure(.invalidURL))
             return
         }
@@ -90,7 +91,7 @@ final class NetworkManager {
         }
     }
     
-    private func getRequest(_ searchText: String?) -> URLRequest? {
+    private func getRequest(_ searchText: String?, page: String?) -> URLRequest? {
         var components = URLComponents()
         components.scheme = "https"
         components.host = "api.flickr.com"
@@ -102,7 +103,8 @@ final class NetworkManager {
             URLQueryItem(name: "format", value: Constants.SearchRequest.format),
             URLQueryItem(name: "text", value: searchText ?? Constants.SearchRequest.defaultText),
             URLQueryItem(name: "nojsoncallback", value: "1"),
-            URLQueryItem(name: "per_page", value: "20")
+            URLQueryItem(name: "per_page", value: "20"),
+            URLQueryItem(name: "page", value: page ?? "1")
         ]
         
         guard let url = components.url else { return nil }

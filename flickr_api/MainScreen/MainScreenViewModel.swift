@@ -9,7 +9,7 @@ import UIKit
 
 final class MainScreenViewModel: NSObject {
     
-    var networkManager: NetworkManager
+    private var networkManager: NetworkManager
     
     private var resources: [ItemViewModel] = [] {
         didSet {
@@ -19,10 +19,14 @@ final class MainScreenViewModel: NSObject {
     
     var updateUI: (() -> Void)?
     
+    private var currentPage = 1
+    private var totalPages = 1
+    private var currentSearchText: String?
+    private var isLoading = false
+    
     init(networkManager: NetworkManager) {
         self.networkManager = networkManager
         super.init()
-        getImagesWith(searchText: nil)
     }
     
     func numberOfItemsInSection() -> Int {
@@ -33,24 +37,39 @@ final class MainScreenViewModel: NSObject {
         resources[indexPath.row]
     }
     
-    private func getImagesWith(searchText: String?) {
+    func loadNextPage() {
+        guard !isLoading else { return }
+        guard currentPage <= totalPages else { return }
         
-        networkManager.getImagesWith(searchText: searchText)
+        isLoading = true
+        
+        getImagesWith(searchText: currentSearchText, page: currentPage)
+    }
+    
+    private func getImagesWith(searchText: String?, page: Int = 1) {
+        
+        networkManager.getImagesWith(searchText: searchText, page: String(page))
         { [weak self] (result: Result<ResponseModel, NetworkError>) in
             
             guard let self = self else { return }
             switch result {
             case .success(let model):
+                self.totalPages = model.photos.pages
+                print(totalPages)
                 var resources: [ItemViewModel] = []
                 let photoModels = model.photos.photo
+                
                 for photoModel in photoModels {
                     let photoRecord = PhotoRecord(imageModel: photoModel)
                     let itemViewModel = ResourceViewModel(networkManager: self.networkManager, photoRecord: photoRecord)
                     resources.append(itemViewModel)
                 }
-                self.resources = resources
+                self.currentPage += 1
+                self.resources.append(contentsOf: resources)
+                self.isLoading = false
                 
-            case .failure(let error): print(error.localizedDescription)
+            case .failure(let error):
+                print(error.localizedDescription)
                 // TODO: - handle error
             }
         }
@@ -71,6 +90,8 @@ extension MainScreenViewModel: UISearchResultsUpdating, UISearchBarDelegate {
         }
         
         if searchText != "" {
+            currentSearchText = searchText
+            currentPage = 1
             getImagesWith(searchText: searchText)
         } else {
             getImagesWith(searchText: nil)

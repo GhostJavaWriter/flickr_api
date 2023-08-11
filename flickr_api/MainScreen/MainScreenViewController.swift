@@ -8,7 +8,7 @@
 import UIKit
 
 class MainScreenViewController: UIViewController {
-
+    
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let width = view.frame.width / 2 - 30
@@ -119,15 +119,12 @@ class MainScreenViewController: UIViewController {
 
 extension MainScreenViewController: UICollectionViewDelegate {
     
-    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
         
-    }
-    
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        
+        if offsetY > contentHeight - scrollView.frame.height {
+            viewModel.loadNextPage()
+        }
     }
 }
