@@ -132,7 +132,7 @@ extension MainScreenViewController: UICollectionViewDelegate {
         let contentHeight = scrollView.contentSize.height
         
         if offsetY > contentHeight - scrollView.frame.height {
-            viewModel.loadNextPage()
+            viewModel.loadMoreData()
         }
     }
     
@@ -156,7 +156,7 @@ extension MainScreenViewController: UISearchBarDelegate {
         
         if searchText != "" {
             activityIndicator.startAnimating()
-            viewModel.searchText(searchText) { [weak self] in
+            viewModel.newSearch(searchText) { [weak self] in
                 DispatchQueue.main.async {
                     self?.activityIndicator.stopAnimating()
                 }

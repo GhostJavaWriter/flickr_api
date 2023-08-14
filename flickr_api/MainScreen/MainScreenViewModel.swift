@@ -37,76 +37,58 @@ final class MainScreenViewModel {
         resources[indexPath.row]
     }
     
-    func searchText(_ searchText: String, completion: (() -> Void)?) {
+    func loadMoreData() {
+        guard !isLoading else { return }
+        guard currentPage <= totalPages else { return }
+        
+        getImages(searchText: currentSearchText, page: currentPage) { [weak self] model in
+            
+            guard let self = self else { return }
+            let result = processLoadedData(model: model)
+            self.resources.append(contentsOf: result)
+        }
+    }
+    
+    func newSearch(_ searchText: String?, completion: (() -> Void)?) {
         currentSearchText = searchText
         currentPage = 1
-        loadData(searchText: searchText) {
+        
+        getImages(searchText: searchText) { [weak self] model in
+            
+            guard let self = self else { return }
+            let result = processLoadedData(model: model)
+            self.resources = result
             completion?()
         }
     }
     
-    func loadNextPage() {
-        guard !isLoading else { return }
-        guard currentPage <= totalPages else { return }
+    private func processLoadedData(model: ResponseModel) -> [ItemViewModel] {
         
-        isLoading = true
-        
-        loadMoreData(searchText: currentSearchText, page: currentPage, completion: nil)
-    }
-    
-    private func loadData(searchText: String?, completion: (() -> Void)?) {
-        
-        networkManager.getImagesWith(searchText: searchText,
-                                     page: "1")
-        { [weak self] (result: Result<ResponseModel, NetworkError>) in
-            
-            guard let self = self else { return }
-            switch result {
-            case .success(let model):
-                self.totalPages = model.photos.pages
-                
-                var resources: [ItemViewModel] = []
-                let photoModels = model.photos.photo
-                
-                for photoModel in photoModels {
-                    let photoRecord = PhotoRecord(imageModel: photoModel)
-                    let itemViewModel = ResourceViewModel(networkManager: self.networkManager, photoRecord: photoRecord)
-                    resources.append(itemViewModel)
-                }
-                self.currentPage += 1
-                self.resources = resources
-                self.isLoading = false
-                completion?()
-            case .failure(let error):
-                print(error.localizedDescription)
-                // TODO: - handle error
-            }
+        var resources: [ItemViewModel] = []
+        let photoModels = model.photos.photo
+
+        for photoModel in photoModels {
+            let photoRecord = PhotoRecord(imageModel: photoModel)
+            let itemViewModel = ResourceViewModel(networkManager: networkManager, photoRecord: photoRecord)
+            resources.append(itemViewModel)
         }
+        
+        totalPages = model.photos.pages
+        currentPage += 1
+        isLoading = false
+        
+        return resources
     }
     
-    private func loadMoreData(searchText: String?, page: Int = 1, completion: (() -> Void)?) {
-        
+    private func getImages(searchText: String?, page: Int = 1, completion: @escaping (ResponseModel) -> Void) {
+        isLoading = true
         networkManager.getImagesWith(searchText: searchText,
                                      page: String(page))
-        { [weak self] (result: Result<ResponseModel, NetworkError>) in
+        { (result: Result<ResponseModel, NetworkError>) in
             
-            guard let self = self else { return }
             switch result {
             case .success(let model):
-                self.totalPages = model.photos.pages
-                
-                var resources: [ItemViewModel] = []
-                let photoModels = model.photos.photo
-                
-                for photoModel in photoModels {
-                    let photoRecord = PhotoRecord(imageModel: photoModel)
-                    let itemViewModel = ResourceViewModel(networkManager: self.networkManager, photoRecord: photoRecord)
-                    resources.append(itemViewModel)
-                }
-                self.currentPage += 1
-                self.resources.append(contentsOf: resources)
-                self.isLoading = false
-                completion?()
+                completion(model)
             case .failure(let error):
                 print(error.localizedDescription)
                 // TODO: - handle error
