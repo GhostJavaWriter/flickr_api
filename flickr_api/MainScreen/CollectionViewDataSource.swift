@@ -30,4 +30,15 @@ final class CollectionViewDataSource: NSObject, UICollectionViewDataSource {
         return cell
     }
     
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        if kind == UICollectionView.elementKindSectionFooter,
+           let aFooterView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LoadingReusableView.defaultReuseIdentifier, for: indexPath) as? LoadingReusableView
+        {
+            viewModel.setupIndicatorView?(aFooterView)
+            return aFooterView
+        }
+        return UICollectionReusableView()
+    }
+    
+    
 }

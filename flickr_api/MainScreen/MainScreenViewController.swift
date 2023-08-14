@@ -21,6 +21,9 @@ class MainScreenViewController: UIViewController {
         collectionView.dataSource = dataSource
         collectionView.register(CollectionViewCell.self,
                                 forCellWithReuseIdentifier: CollectionViewCell.defaultReuseIdentifier)
+        collectionView.register(LoadingReusableView.self,
+                                forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+                                withReuseIdentifier: LoadingReusableView.defaultReuseIdentifier)
         return collectionView
     }()
     
@@ -35,10 +38,11 @@ class MainScreenViewController: UIViewController {
         let controller = UISearchController(searchResultsController: nil)
         controller.searchBar.sizeToFit()
         controller.searchBar.placeholder = "Search photo..."
-        controller.searchResultsUpdater = viewModel
         controller.searchBar.delegate = viewModel
         return controller
     }()
+    
+    private var loadingReusableView: LoadingReusableView?
     
     private lazy var dataSource = CollectionViewDataSource(viewModel: viewModel)
     var viewModel: MainScreenViewModel
@@ -53,6 +57,10 @@ class MainScreenViewController: UIViewController {
         viewModel.updateUI = { [weak self] in
             self?.updateUI()
         }
+        viewModel.setupIndicatorView = { [weak self] view in
+            self?.loadingReusableView = view
+        }
+        
     }
     
     required init?(coder: NSCoder) {
@@ -72,29 +80,6 @@ class MainScreenViewController: UIViewController {
         DispatchQueue.main.async {
             self.collectionView.reloadData()
         }
-    }
-    
-    private func addKeyboardObservers() {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    
-    @objc private func keyboardWillShow(notification: NSNotification) {
-        guard let userInfo = notification.userInfo,
-              let keyboardSize = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
-        else {
-            return
-        }
-        
-        let contentInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize.height, right: 0.0)
-        collectionView.contentInset = contentInsets
-        collectionView.scrollIndicatorInsets = contentInsets
-    }
-    
-    @objc private func keyboardWillHide(notification: NSNotification) {
-        let contentInsets = UIEdgeInsets.zero
-        collectionView.contentInset = contentInsets
-        collectionView.scrollIndicatorInsets = contentInsets
     }
     
     private func setupUI() {
@@ -117,6 +102,19 @@ class MainScreenViewController: UIViewController {
     
 }
 
+extension MainScreenViewController: UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        referenceSizeForFooterInSection section: Int) -> CGSize {
+        if self.viewModel.loadingIndicatorShouldAnimate {
+            return CGSize(width: collectionView.bounds.size.width, height: 55)
+        } else {
+            return CGSize.zero
+        }
+    }
+}
+
 extension MainScreenViewController: UICollectionViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -126,5 +124,42 @@ extension MainScreenViewController: UICollectionViewDelegate {
         if offsetY > contentHeight - scrollView.frame.height {
             viewModel.loadNextPage()
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
+        if elementKind == UICollectionView.elementKindSectionFooter {
+            self.loadingReusableView?.activityIndicatorView.startAnimating()
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didEndDisplayingSupplementaryView view: UICollectionReusableView, forElementOfKind elementKind: String, at indexPath: IndexPath) {
+        if elementKind == UICollectionView.elementKindSectionFooter {
+            self.loadingReusableView?.activityIndicatorView.stopAnimating()
+        }
+    }
+}
+
+private extension MainScreenViewController {
+    func addKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let keyboardSize = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
+        else {
+            return
+        }
+        
+        let contentInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize.height, right: 0.0)
+        collectionView.contentInset = contentInsets
+        collectionView.scrollIndicatorInsets = contentInsets
+    }
+    
+    @objc func keyboardWillHide(notification: NSNotification) {
+        let contentInsets = UIEdgeInsets.zero
+        collectionView.contentInset = contentInsets
+        collectionView.scrollIndicatorInsets = contentInsets
     }
 }

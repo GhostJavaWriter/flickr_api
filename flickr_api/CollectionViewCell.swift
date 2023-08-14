@@ -76,7 +76,3 @@ final class CollectionViewCell: UICollectionViewCell, ResourceCell {
         ])
     }
 }
-
-extension UICollectionViewCell {
-    static var defaultReuseIdentifier: String { String(describing: self) }
-}

@@ -37,10 +37,8 @@ struct ResourceViewModel: ItemViewModel {
         switch photoRecord.state {
         case .downloaded:
             cell.stopAnimating()
-            NSLog("downloaded")
         case .failed:
             cell.stopAnimating()
-            NSLog("failed")
         case .new:
             cell.startAnimating()
             networkManager.addLoadOperation(photoRecord: photoRecord, at: indexPath) {

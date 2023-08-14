@@ -18,11 +18,15 @@ final class MainScreenViewModel: NSObject {
     }
     
     var updateUI: (() -> Void)?
+    var setupIndicatorView: ((LoadingReusableView) -> Void)?
     
     private var currentPage = 1
     private var totalPages = 1
     private var currentSearchText: String?
-    private var isLoading = false
+    private(set) var isLoading = false
+    var loadingIndicatorShouldAnimate: Bool {
+        !isLoading && !resources.isEmpty
+    }
     
     init(networkManager: NetworkManager) {
         self.networkManager = networkManager
@@ -48,14 +52,15 @@ final class MainScreenViewModel: NSObject {
     
     private func getImagesWith(searchText: String?, page: Int = 1) {
         
-        networkManager.getImagesWith(searchText: searchText, page: String(page))
+        networkManager.getImagesWith(searchText: searchText,
+                                     page: String(page))
         { [weak self] (result: Result<ResponseModel, NetworkError>) in
             
             guard let self = self else { return }
             switch result {
             case .success(let model):
                 self.totalPages = model.photos.pages
-                print(totalPages)
+                
                 var resources: [ItemViewModel] = []
                 let photoModels = model.photos.photo
                 
@@ -76,12 +81,7 @@ final class MainScreenViewModel: NSObject {
     }
 }
 
-extension MainScreenViewModel: UISearchResultsUpdating, UISearchBarDelegate {
-    
-    func updateSearchResults(for searchController: UISearchController) {
-        
-        
-    }
+extension MainScreenViewModel: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchBar.text else {
@@ -97,6 +97,5 @@ extension MainScreenViewModel: UISearchResultsUpdating, UISearchBarDelegate {
             getImagesWith(searchText: nil)
         }
     }
-    
     
 }
