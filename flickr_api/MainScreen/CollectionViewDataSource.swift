@@ -16,12 +16,12 @@ final class CollectionViewDataSource: NSObject, UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        viewModel.numberOfItemsInSection()
+        viewModel.numberOfPhotos()
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        let model = viewModel.itemAtIndexPath(indexPath)
+        let model = viewModel.photoAtIndexPath(indexPath)
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionViewCell.defaultReuseIdentifier,
                                                       for: indexPath)
         

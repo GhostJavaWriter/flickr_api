@@ -16,7 +16,13 @@ final class MainScreenViewModel {
             updateUI?()
         }
     }
+    private var searchHistoryItems: [String] = [] {
+        didSet {
+            updateSearchHistory?()
+        }
+    }
     
+    var updateSearchHistory: (() -> Void)?
     var updateUI: (() -> Void)?
     var setupIndicatorView: ((LoadingReusableView) -> Void)?
     
@@ -25,17 +31,49 @@ final class MainScreenViewModel {
     private var currentSearchText: String?
     private(set) var isLoading = false
     
+    private let searchHistoryKey = "history"
+    
+    // MARK: - Init
+    
     init(networkManager: NetworkManager) {
         self.networkManager = networkManager
+        retriveSearchHistory()
     }
     
-    func numberOfItemsInSection() -> Int {
+    // MARK: - CollectionViewDataSource
+    
+    func numberOfPhotos() -> Int {
         resources.count
     }
     
-    func itemAtIndexPath(_ indexPath: IndexPath) -> ItemViewModel {
+    func photoAtIndexPath(_ indexPath: IndexPath) -> ItemViewModel {
         resources[indexPath.row]
     }
+    
+    // MARK: - SearchTableViewDataSource
+    
+    func numberOfSearchItems() -> Int {
+        searchHistoryItems.count
+    }
+    
+    func searchItemAt(_ indexPath: IndexPath) -> String {
+        searchHistoryItems[indexPath.row]
+    }
+    
+    func saveSearch(_ searchText: String) {
+        searchHistoryItems.append(searchText)
+        UserDefaults.standard.set(searchHistoryItems, forKey: searchHistoryKey)
+    }
+    
+    private func retriveSearchHistory() {
+        if let items = UserDefaults.standard.stringArray(forKey: searchHistoryKey) {
+            searchHistoryItems = items
+        } else {
+            UserDefaults.standard.set(searchHistoryItems, forKey: searchHistoryKey)
+        }
+    }
+    
+    // MARK: - Network call
     
     func loadMoreData() {
         guard !isLoading else { return }
@@ -51,6 +89,7 @@ final class MainScreenViewModel {
     
     func newSearch(_ searchText: String?, completion: (() -> Void)?) {
         currentSearchText = searchText
+        saveSearch(searchText ?? "")
         currentPage = 1
         
         getImages(searchText: searchText) { [weak self] model in

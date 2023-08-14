@@ -20,6 +20,7 @@
 		DE6B5C7C2A7DDDF400433E23 /* MainScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE6B5C7B2A7DDDF400433E23 /* MainScreenViewModel.swift */; };
 		DE6D22A42A817C84004B2408 /* PhotoOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE6D22A32A817C84004B2408 /* PhotoOperation.swift */; };
 		DE6D22A82A86B034004B2408 /* LoadingReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE6D22A72A86B034004B2408 /* LoadingReusableView.swift */; };
+		DE6D22AA2A8ABE49004B2408 /* SearchTableViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE6D22A92A8ABE49004B2408 /* SearchTableViewDataSource.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		DE6B5C7B2A7DDDF400433E23 /* MainScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScreenViewModel.swift; sourceTree = "<group>"; };
 		DE6D22A32A817C84004B2408 /* PhotoOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoOperation.swift; sourceTree = "<group>"; };
 		DE6D22A72A86B034004B2408 /* LoadingReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingReusableView.swift; sourceTree = "<group>"; };
+		DE6D22A92A8ABE49004B2408 /* SearchTableViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTableViewDataSource.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +102,7 @@
 				DE6B5C5D2A7D668E00433E23 /* MainScreenViewController.swift */,
 				DE6B5C7B2A7DDDF400433E23 /* MainScreenViewModel.swift */,
 				DE6B5C732A7D9D0900433E23 /* CollectionViewDataSource.swift */,
+				DE6D22A92A8ABE49004B2408 /* SearchTableViewDataSource.swift */,
 			);
 			path = MainScreen;
 			sourceTree = "<group>";
@@ -176,6 +179,7 @@
 			files = (
 				DE6B5C6E2A7D672D00433E23 /* NetworkManager.swift in Sources */,
 				DE6D22A82A86B034004B2408 /* LoadingReusableView.swift in Sources */,
+				DE6D22AA2A8ABE49004B2408 /* SearchTableViewDataSource.swift in Sources */,
 				DE6B5C742A7D9D0900433E23 /* CollectionViewDataSource.swift in Sources */,
 				DE6B5C7A2A7DDB0000433E23 /* ResourceViewModel.swift in Sources */,
 				DE6B5C5E2A7D668E00433E23 /* MainScreenViewController.swift in Sources */,
