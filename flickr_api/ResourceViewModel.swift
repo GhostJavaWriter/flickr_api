@@ -43,10 +43,7 @@ struct ResourceViewModel: ItemViewModel {
             cell.startAnimating()
             networkManager.addLoadOperation(photoRecord: photoRecord, at: indexPath) {
                 
-                guard let cell = collectionView.cellForItem(at: indexPath) as? ResourceCell else {
-                    NSLog("cell error(2)")
-                    return
-                }
+                guard let cell = collectionView.cellForItem(at: indexPath) as? ResourceCell else { return }
                 
                 DispatchQueue.main.async {
                     collectionView.reloadItems(at: [indexPath])

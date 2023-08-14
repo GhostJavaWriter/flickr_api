@@ -38,8 +38,14 @@ class MainScreenViewController: UIViewController {
         let controller = UISearchController(searchResultsController: nil)
         controller.searchBar.sizeToFit()
         controller.searchBar.placeholder = "Search photo..."
-        controller.searchBar.delegate = viewModel
+        controller.searchBar.delegate = self
         return controller
+    }()
+    
+    private lazy var activityIndicator: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     private var loadingReusableView: LoadingReusableView?
@@ -86,6 +92,7 @@ class MainScreenViewController: UIViewController {
         view.backgroundColor = .white
         view.addSubview(collectionView)
         view.addSubview(searchBarPlaceholder)
+        view.addSubview(activityIndicator)
         
         let layouGuide = view.layoutMarginsGuide
         NSLayoutConstraint.activate([
@@ -96,7 +103,10 @@ class MainScreenViewController: UIViewController {
             collectionView.topAnchor.constraint(equalToSystemSpacingBelow: searchBarPlaceholder.bottomAnchor, multiplier: 1),
             collectionView.leadingAnchor.constraint(equalTo: layouGuide.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: layouGuide.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: layouGuide.bottomAnchor)
+            collectionView.bottomAnchor.constraint(equalTo: layouGuide.bottomAnchor),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
         ])
     }
     
@@ -107,7 +117,7 @@ extension MainScreenViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         referenceSizeForFooterInSection section: Int) -> CGSize {
-        if self.viewModel.loadingIndicatorShouldAnimate {
+        if self.viewModel.isLoading {
             return CGSize(width: collectionView.bounds.size.width, height: 55)
         } else {
             return CGSize.zero
@@ -135,6 +145,23 @@ extension MainScreenViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didEndDisplayingSupplementaryView view: UICollectionReusableView, forElementOfKind elementKind: String, at indexPath: IndexPath) {
         if elementKind == UICollectionView.elementKindSectionFooter {
             self.loadingReusableView?.activityIndicatorView.stopAnimating()
+        }
+    }
+}
+
+extension MainScreenViewController: UISearchBarDelegate {
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        guard let searchText = searchBar.text else { return }
+        
+        if searchText != "" {
+            activityIndicator.startAnimating()
+            viewModel.searchText(searchText) { [weak self] in
+                DispatchQueue.main.async {
+                    self?.activityIndicator.stopAnimating()
+                }
+                
+            }
         }
     }
 }
