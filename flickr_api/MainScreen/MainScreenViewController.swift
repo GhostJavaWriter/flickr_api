@@ -152,6 +152,7 @@ extension MainScreenViewController: UITableViewDelegate {
         
         let searchText = viewModel.searchItemAt(indexPath)
         searchController.searchBar.text = searchText
+        searchFor(searchText)
     }
 }
 
@@ -171,14 +172,7 @@ extension MainScreenViewController: UISearchBarDelegate {
         guard let searchText = searchBar.text else { return }
         
         if searchText != "" {
-            activityIndicator.startAnimating()
-            
-            viewModel.newSearch(searchText) { [weak self] in
-                DispatchQueue.main.async {
-                    self?.activityIndicator.stopAnimating()
-                    self?.searchHistoryTableView.isHidden = true
-                }
-            }
+            searchFor(searchText)
         }
     }
 }
@@ -186,6 +180,17 @@ extension MainScreenViewController: UISearchBarDelegate {
 // MARK: - Private methods
 
 private extension MainScreenViewController {
+    
+    private func searchFor(_ text: String) {
+        activityIndicator.startAnimating()
+        
+        viewModel.newSearch(text) { [weak self] in
+            DispatchQueue.main.async {
+                self?.activityIndicator.stopAnimating()
+                self?.searchHistoryTableView.isHidden = true
+            }
+        }
+    }
     
     func updateUI() {
         DispatchQueue.main.async {
