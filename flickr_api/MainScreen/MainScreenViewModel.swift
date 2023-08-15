@@ -13,7 +13,7 @@ final class MainScreenViewModel {
     
     private var resources: [ItemViewModel] = [] {
         didSet {
-            updateUI?()
+            updateImagesCollectionView?()
         }
     }
     private var searchHistoryItems: [String] = [] {
@@ -23,8 +23,8 @@ final class MainScreenViewModel {
     }
     
     var updateSearchHistory: (() -> Void)?
-    var updateUI: (() -> Void)?
-    var setupIndicatorView: ((LoadingReusableView) -> Void)?
+    var updateImagesCollectionView: (() -> Void)?
+    var setupFooterIndicatorView: ((LoadingReusableView) -> Void)?
     
     private var currentPage = 1
     private var totalPages = 1
@@ -42,24 +42,29 @@ final class MainScreenViewModel {
     
     // MARK: - CollectionViewDataSource
     
-    func numberOfPhotos() -> Int {
+    /// Returns number of image models in resources that loaded from network
+    func numberOfImageModels() -> Int {
         resources.count
     }
     
-    func photoAtIndexPath(_ indexPath: IndexPath) -> ItemViewModel {
+    /// Returns specified image model from resources that loaded from network
+    func imageModelAtIndexPath(_ indexPath: IndexPath) -> ItemViewModel {
         resources[indexPath.row]
     }
     
     // MARK: - SearchTableViewDataSource
     
+    /// Returns number of items in search history
     func numberOfSearchItems() -> Int {
         searchHistoryItems.count
     }
     
+    /// Returns specified searched text at indexPath from search history
     func searchItemAt(_ indexPath: IndexPath) -> String {
         searchHistoryItems[indexPath.row]
     }
     
+    /// Saves searched text in UserDefaults
     func saveSearch(_ searchText: String) {
         searchHistoryItems.append(searchText)
         UserDefaults.standard.set(searchHistoryItems, forKey: searchHistoryKey)
@@ -75,6 +80,7 @@ final class MainScreenViewModel {
     
     // MARK: - Network call
     
+    /// Loads and appends new data from the next page
     func loadMoreData() {
         guard !isLoading else { return }
         guard currentPage <= totalPages else { return }
@@ -87,6 +93,7 @@ final class MainScreenViewModel {
         }
     }
     
+    /// Loads and assigns new data from request with specified search text
     func newSearch(_ searchText: String?, completion: (() -> Void)?) {
         currentSearchText = searchText
         saveSearch(searchText ?? "")
@@ -121,7 +128,7 @@ final class MainScreenViewModel {
     
     private func getImages(searchText: String?, page: Int = 1, completion: @escaping (ResponseModel) -> Void) {
         isLoading = true
-        networkManager.getImagesWith(searchText: searchText,
+        networkManager.retriveData(searchText: searchText,
                                      page: String(page))
         { (result: Result<ResponseModel, NetworkError>) in
             

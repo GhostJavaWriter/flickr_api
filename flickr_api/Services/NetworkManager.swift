@@ -23,6 +23,7 @@ final class NetworkManager {
     
     private let pendingOperations = PendingOperations()
     
+    /// Add image load operation to queue
     func addLoadOperation(photoRecord: PhotoRecord,
                           at indexPath: IndexPath,
                           completion: @escaping (() -> Void)) {
@@ -48,9 +49,10 @@ final class NetworkManager {
         pendingOperations.downloadQueue.addOperation(downloader)
     }
     
-    func getImagesWith<T: Codable>(searchText: String?,
-                                   page: String?,
-                                   completion: @escaping (Result<T, NetworkError>) -> Void) {
+    /// Retrieve data from network with specified search text and page
+    func retriveData<T: Codable>(searchText: String?,
+                                 page: String?,
+                                 completion: @escaping (Result<T, NetworkError>) -> Void) {
         
         guard let request = getRequest(searchText, page: page) else {
             completion(.failure(.invalidURL))

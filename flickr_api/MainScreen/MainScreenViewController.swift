@@ -76,10 +76,10 @@ class MainScreenViewController: UIViewController {
         
         super.init(nibName: nil, bundle: nil)
         
-        viewModel.updateUI = { [weak self] in
+        viewModel.updateImagesCollectionView = { [weak self] in
             self?.updateUI()
         }
-        viewModel.setupIndicatorView = { [weak self] view in
+        viewModel.setupFooterIndicatorView = { [weak self] view in
             self?.loadingReusableView = view
         }
         viewModel.updateSearchHistory = { [weak self] in

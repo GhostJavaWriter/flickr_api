@@ -16,12 +16,12 @@ final class CollectionViewDataSource: NSObject, UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        viewModel.numberOfPhotos()
+        viewModel.numberOfImageModels()
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        let model = viewModel.photoAtIndexPath(indexPath)
+        let model = viewModel.imageModelAtIndexPath(indexPath)
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionViewCell.defaultReuseIdentifier,
                                                       for: indexPath)
         
@@ -34,7 +34,7 @@ final class CollectionViewDataSource: NSObject, UICollectionViewDataSource {
         if kind == UICollectionView.elementKindSectionFooter,
            let aFooterView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LoadingReusableView.defaultReuseIdentifier, for: indexPath) as? LoadingReusableView
         {
-            viewModel.setupIndicatorView?(aFooterView)
+            viewModel.setupFooterIndicatorView?(aFooterView)
             return aFooterView
         }
         return UICollectionReusableView()
